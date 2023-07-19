@@ -1,5 +1,6 @@
 package com.zzd.giligili.service.handler;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.zzd.giligili.domain.JsonResponse;
 import com.zzd.giligili.domain.exception.ConditionException;
 import org.springframework.core.Ordered;
@@ -18,9 +19,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CommonGlobalExceptionHandler {
 
-    @ExceptionHandler(value = Exception.class)
+    @ExceptionHandler(value = {Exception.class, TokenExpiredException.class})
     @ResponseBody
-    public JsonResponse<String> conditionExceptionHandler(HttpRequest request, Exception e){
+    public JsonResponse<String> conditionExceptionHandler(Exception e){
         String errorMsg = e.getMessage();
         if (e instanceof ConditionException){
             String errorCode = ((ConditionException) e).getCode();

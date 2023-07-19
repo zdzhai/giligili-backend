@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zzd.giligili.dao.UserInfoDao">
+    <insert id="addUserInfo" parameterType="com.zzd.giligili.domain.UserInfo">
+        insert into
+        t_user_info(
+        userId,
+        nick,
+        avatar,
+        sign,
+        gender,
+        birth,
+        createTime
+        )
+        values (
+        #{userId},
+        #{nick},
+        #{avatar},
+        #{sign},
+        #{gender},
+        #{birth},
+        #{createTime}
+        )
+    </insert>
+    <update id="updateUserInfo" parameterType="com.zzd.giligili.domain.UserInfo">
+        update t_user_info
+            set
+            <if test="nick != null and nick != ''">
+                nick = #{nick},
+            </if>
+            <if test="avatar != null and avatar != ''">
+                avatar = #{avatar},
+            </if>
+            <if test="sign != null and sign != ''">
+                sign = #{sign},
+            </if>
+            <if test="gender != null and gender != ''">
+                gender = #{gender},
+            </if>
+            <if test="birth != null and birth != ''">
+                birth = #{birth},
+            </if>
+                updateTime = #{updateTime}
+            where userId = #{userId}
+    </update>
+
+    <select id="query" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select id from t_demo where id = #{id}
+    </select>
+
+
+    <select id="getUserInfoById" parameterType="java.lang.Long"
+            resultType="com.zzd.giligili.domain.UserInfo">
+        select
+            *
+        from
+        t_user_info
+        where
+        userId = #{userId}
+    </select>
+
+</mapper>
