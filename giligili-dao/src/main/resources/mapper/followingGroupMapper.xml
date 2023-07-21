@@ -9,6 +9,24 @@
         id,userId,name,
         type,createTime,updateTime
     </sql>
+
+    <insert id="addUserFollowingGroup" parameterType="com.zzd.giligili.domain.FollowingGroup"
+                useGeneratedKeys="true" keyProperty="id">
+        insert into
+            t_following_group(
+                userId,
+                `name`,
+                `type`,
+                createTime
+            ) values (
+               #{userId},
+                #{name},
+                #{type},
+                #{createTime}
+            )
+
+    </insert>
+
     <select id="getFollowingGroupByType" resultType="com.zzd.giligili.domain.FollowingGroup">
          select
             *
@@ -24,7 +42,22 @@
             t_following_group
             where groupId = #{groupId}
     </select>
-
+    <select id="getFollowingGroupByUserId" resultType="com.zzd.giligili.domain.FollowingGroup">
+        select
+            *
+            from
+            t_following_group
+            where
+            userId = #{userId} or `type` in('0','1','2')
+    </select>
+    <select id="getUserFollowingGroup" parameterType="java.lang.Long" resultType="com.zzd.giligili.domain.FollowingGroup">
+        select
+            *
+            from
+            t_following_group
+            where
+            userId = #{userId}
+    </select>
 
 
 </mapper>

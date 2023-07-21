@@ -2,8 +2,10 @@ package com.zzd.giligili.domain;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
+ * @author dongdong
  * @TableName t_following_group
  */
 public class FollowingGroup implements Serializable {
@@ -19,6 +21,16 @@ public class FollowingGroup implements Serializable {
 
     private Date updateTime;
 
+    private List<UserInfo> followingUserInfoList;
+
+    public List<UserInfo> getFollowingUserInfoList() {
+        return followingUserInfoList;
+    }
+
+    public void setFollowingUserInfoList(List<UserInfo> followingUserInfoList) {
+        this.followingUserInfoList = followingUserInfoList;
+    }
+
     private static final long serialVersionUID = 1L;
 
     public Long getId() {
@@ -29,11 +41,11 @@ public class FollowingGroup implements Serializable {
         this.id = id;
     }
 
-    public Long getuserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setuserId(Long userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
@@ -82,7 +94,7 @@ public class FollowingGroup implements Serializable {
         }
         FollowingGroup other = (FollowingGroup) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getuserId() == null ? other.getuserId() == null : this.getuserId().equals(other.getuserId()))
+            && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
             && (this.getName() == null ? other.getName() == null : this.getName().equals(other.getName()))
             && (this.getType() == null ? other.getType() == null : this.getType().equals(other.getType()))
             && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
@@ -94,7 +106,7 @@ public class FollowingGroup implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
-        result = prime * result + ((getuserId() == null) ? 0 : getuserId().hashCode());
+        result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
         result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         result = prime * result + ((getType() == null) ? 0 : getType().hashCode());
         result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());

@@ -17,4 +17,8 @@ public interface UserConstant {
     public static final String DEFAULT_NICK_NAME = "小萌新";
 
     public static final Integer DEFAULT_GROUP_TYPE = 2;
+
+    public static final String DEFAULT_ALL_USER_GROUP = "全部分组";
+
+    public static final String DEFAULT_USER_GROUP_NEW = "3";
 }

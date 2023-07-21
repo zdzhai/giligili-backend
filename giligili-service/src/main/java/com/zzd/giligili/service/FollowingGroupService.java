@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
 * @author 62618
@@ -37,6 +38,32 @@ public class FollowingGroupService {
         return followingGroup;
     }
 
+    /**
+     * 根据用户id查询用户所有分类信息
+     * @param userId
+     * @return
+     */
+    public List<FollowingGroup> getFollowingGroupByUserId(Long userId) {
+        return followingGroupDao.getFollowingGroupByUserId(userId);
+
+    }
+
+    /**
+     * 新增用户分组信息
+     * @param followingGroup
+     * @return
+     */
+    public Long addUserFollowingGroup(FollowingGroup followingGroup) {
+        return followingGroupDao.addUserFollowingGroup(followingGroup);
+    }
+
+    /**
+     * 获取用户关注分组信息
+     * @return
+     */
+    public List<FollowingGroup> getUserFollowingGroup() {
+        return followingGroupDao.getUserFollowingGroup();
+    }
 }
 
 

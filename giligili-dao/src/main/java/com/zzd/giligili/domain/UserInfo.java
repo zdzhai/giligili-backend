@@ -25,6 +25,16 @@ public class UserInfo implements Serializable {
 
     private Date updateTime;
 
+    private boolean followed;
+
+    public boolean isFollowed() {
+        return followed;
+    }
+
+    public void setFollowed(boolean followed) {
+        this.followed = followed;
+    }
+
     private static final long serialVersionUID = 1L;
 
     public Long getId() {

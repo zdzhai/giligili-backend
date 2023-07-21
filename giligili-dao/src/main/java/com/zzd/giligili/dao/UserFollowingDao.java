@@ -9,6 +9,8 @@ import com.zzd.giligili.domain.UserFollowing;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * @author 62618
  * @description 针对表【t_user_following(用户关注表)】的数据库操作Mapper
@@ -30,4 +32,18 @@ public interface UserFollowingDao {
      * @param userFollowing
      */
     Long addUserFollowing(UserFollowing userFollowing);
+
+    /**
+     * 获取用户关注列表
+     * @param userId
+     * @return
+     */
+    List<UserFollowing> getUserFollowings(Long userId);
+
+    /**
+     * 获取用户粉丝列表
+     * @param userId
+     * @return
+     */
+    List<UserFollowing> getUserFans(@Param("followingId")Long userId);
 }

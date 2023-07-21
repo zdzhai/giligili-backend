@@ -17,6 +17,8 @@ public class UserFollowing implements Serializable {
 
     private Date createTime;
 
+    private UserInfo followingUserInfo;
+
     private static final long serialVersionUID = 1L;
 
     public Long getId() {
@@ -27,11 +29,19 @@ public class UserFollowing implements Serializable {
         this.id = id;
     }
 
-    public Long getuserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setuserId(Long userId) {
+    public UserInfo getFollowingUserInfo() {
+        return followingUserInfo;
+    }
+
+    public void setFollowingUserInfo(UserInfo followingUserInfo) {
+        this.followingUserInfo = followingUserInfo;
+    }
+
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
@@ -72,7 +82,7 @@ public class UserFollowing implements Serializable {
         }
         UserFollowing other = (UserFollowing) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getuserId() == null ? other.getuserId() == null : this.getuserId().equals(other.getuserId()))
+            && (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
             && (this.getFollowingId() == null ? other.getFollowingId() == null : this.getFollowingId().equals(other.getFollowingId()))
             && (this.getGroupId() == null ? other.getGroupId() == null : this.getGroupId().equals(other.getGroupId()))
             && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()));
@@ -83,7 +93,7 @@ public class UserFollowing implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
-        result = prime * result + ((getuserId() == null) ? 0 : getuserId().hashCode());
+        result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
         result = prime * result + ((getFollowingId() == null) ? 0 : getFollowingId().hashCode());
         result = prime * result + ((getGroupId() == null) ? 0 : getGroupId().hashCode());
         result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
