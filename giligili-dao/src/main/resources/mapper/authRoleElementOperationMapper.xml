@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zzd.giligili.dao.AuthRoleElementOperationDao">
+
+    <resultMap id="AuthRoleElementOperationResultMap" type="com.zzd.giligili.domain.auth.AuthRoleElementOperation">
+        <id column="id" property="id"/>
+        <id column="roleId" property="roleId"/>
+        <id column="elementOperationId" property="elementOperationId"/>
+        <association property="authElementOperation" javaType="com.zzd.giligili.domain.auth.AuthElementOperation">
+            <id column="elementName" property="elementName"/>
+            <id column="elementCode" property="elementCode"/>
+            <id column="operationType" property="operationType"/>
+        </association>
+    </resultMap>
+
+
+    <select id="getAuthRoleElementOperationByRoleIds" parameterType="java.util.Set"
+            resultMap="AuthRoleElementOperationResultMap">
+        select
+            tareo.*,
+            taeo.elementName elementName,
+            taeo.elementCode elementCode,
+            taeo.operationType operationType
+        from
+            t_auth_role_element_operation tareo
+            left join t_auth_element_operation taeo on tareo.elementOperationId = taeo.id
+        where
+            tareo.roleId in
+            <foreach collection="roleIdSet" item="roleId" open="(" close=")" separator="," index="index">
+                #{roleId}
+            </foreach>
+    </select>
+
+</mapper>

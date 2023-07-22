@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zzd.giligili.dao.AuthRoleMenuDao">
+
+    <resultMap id="AuthRoleMenuResultMap" type="com.zzd.giligili.domain.auth.AuthRoleMenu">
+        <id column="id" property="id"/>
+        <id column="roleId" property="roleId"/>
+        <id column="menuId" property="menuId"/>
+        <association property="authMenu" javaType="com.zzd.giligili.domain.auth.AuthMenu">
+            <id column="name" property="name"/>
+            <id column="code" property="code"/>
+        </association>
+    </resultMap>
+
+    <select id="getAuthRoleMenuByRoleIds" parameterType="java.util.Set"
+            resultMap="AuthRoleMenuResultMap">
+        select
+            tarm.*,
+            tam.name name,
+            tam.code code
+        from
+            t_auth_role_menu tarm
+            left join t_auth_menu tam on tarm.menuId = tam.id
+        where
+            tarm.roleId in
+            <foreach collection="roleIdSet" item="roleId" open="(" close=")" separator="," index="index">
+                #{roleId}
+            </foreach>
+    </select>
+
+</mapper>
