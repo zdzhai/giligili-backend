@@ -3,6 +3,7 @@ package com.zzd.giligili.service;
 import com.mysql.cj.util.StringUtils;
 import com.zzd.giligili.dao.UserDao;
 import com.zzd.giligili.dao.UserInfoDao;
+import com.zzd.giligili.domain.RefreshTokenDetails;
 import com.zzd.giligili.domain.User;
 import com.zzd.giligili.domain.UserInfo;
 import com.zzd.giligili.domain.constant.UserConstant;
@@ -10,10 +11,14 @@ import com.zzd.giligili.domain.exception.ConditionException;
 import com.zzd.giligili.service.utils.MD5Util;
 import com.zzd.giligili.service.utils.RSAUtil;
 import com.zzd.giligili.service.utils.TokenUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
 * @author dongdong
@@ -29,6 +34,10 @@ public class UserService {
     @Resource
     private UserInfoDao userInfoDao;
 
+    @Autowired
+    private UserAuthService userAuthService;
+
+    @Transactional
     public void addUser(User user) {
         //1.校验参数
         String phone = user.getPhone();
@@ -64,6 +73,9 @@ public class UserService {
         userInfo.setGender(UserConstant.GENDER_UNKNOW);
         userInfo.setCreateTime(now);
         userInfoDao.addUserInfo(userInfo);
+        //添加默认权限角色
+        userAuthService.addUserDefaultRole(user.getId());
+
     }
 
     private User getUserByPhone(String phone) {
@@ -122,5 +134,73 @@ public class UserService {
     public Long updateUserInfo(UserInfo userInfo) {
         userInfo.setUpdateTime(new Date());
         return userInfoDao.updateUserInfo(userInfo);
+    }
+
+    /**
+     * 获取双token
+     * @param user
+     * @return
+     */
+    public Map<String, Object> loginForDts(User user) throws Exception {
+        //1.参数校验
+        if (user == null){
+            throw new ConditionException("请求参数不正确！");
+        }
+        String phone = user.getPhone();
+        if (StringUtils.isNullOrEmpty(phone)){
+            throw new ConditionException("手机号不能为空");
+        }
+        User dbUser = this.getUserByPhone(phone);
+        if (dbUser == null) {
+            throw new ConditionException("手机号尚未注册!");
+        }
+        String password = user.getPassword();
+        //2.密码解密及校验
+        String decryptPwd;
+        try {
+            decryptPwd = RSAUtil.decrypt(password);
+        } catch (Exception e){
+            throw new ConditionException("密码解密失败！");
+        }
+        String salt = dbUser.getSalt();
+        String signPwd = MD5Util.sign(decryptPwd, salt, "UTF-8");
+        if (!signPwd.equals(dbUser.getPassword())){
+            throw new ConditionException("密码错误！");
+        }
+        //3.生成用户登录token
+        Long userId = dbUser.getId();
+        String token;
+        try {
+            token = TokenUtil.generateToken(userId);
+        } catch (Exception e) {
+            throw new ConditionException("获取token失败");
+        }
+
+        String refreshToken = TokenUtil.generateRefreshToken(userId);
+        userDao.deleteRefreshToken(userId, refreshToken);
+        userDao.addRefreshToken(userId, refreshToken, new Date());
+        Map<String, Object> map = new HashMap<>();
+        map.put("token", token);
+        map.put("refreshToken", refreshToken);
+        return map;
+    }
+
+    /**
+     * 删除refreshToken
+     * @param userId
+     * @param refreshToken
+     */
+    public void logout(Long userId, String refreshToken) {
+        userDao.deleteRefreshToken(userId, refreshToken);
+    }
+
+    public String refreshAccessToken(String refreshToken) throws Exception {
+        RefreshTokenDetails refreshTokenDetails = userDao.getRefreshAccessToken(refreshToken);
+        if (refreshTokenDetails == null) {
+            throw new ConditionException("555", "token过期！");
+        }
+        TokenUtil.verifyToken(refreshToken);
+        Long userId = refreshTokenDetails.getUserId();
+       return TokenUtil.generateToken(userId);
     }
 }

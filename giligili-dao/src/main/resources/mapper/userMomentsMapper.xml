@@ -20,7 +20,7 @@
     <insert id="addUserMoments" parameterType="com.zzd.giligili.domain.UserMoments"
             useGeneratedKeys="true" keyProperty="id">
         insert into
-            t_user_moment(
+            t_user_moments(
                 userId,
                 `type`,
                 contentId,

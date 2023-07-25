@@ -14,12 +14,25 @@
             salt,
             createTime
             )
-            values (
+        values (
             #{phone},
             #{email},
             #{password},
             #{salt},
             #{createTime})
+    </insert>
+
+    <insert id="addRefreshToken">
+        insert into
+            t_refresh_token(
+                userId,
+                refreshToken,
+                createTime
+            ) values (
+                #{userId},
+                #{refreshToken},
+                #{createTime}
+            )
     </insert>
 
     <update id="updateUser" parameterType="com.zzd.giligili.domain.User"
@@ -41,6 +54,12 @@
             updateTime = #{updateTime}
             where id = #{id}
     </update>
+    <delete id="deleteRefreshToken">
+        delete from
+            t_refresh_token
+        where
+            refreshToken = #{refreshToken}
+    </delete>
 
     <select id="getUserByPhone" parameterType="java.lang.String"
             resultType="com.zzd.giligili.domain.User">
@@ -54,6 +73,15 @@
             from
             t_user
             where id = #{id}
+    </select>
+    <select id="getRefreshAccessToken" parameterType="java.lang.String"
+            resultType="com.zzd.giligili.domain.RefreshTokenDetails">
+        select
+            *
+            from
+            t_refresh_token
+            where
+             refreshToken = #{refreshToken}
     </select>
 
 </mapper>

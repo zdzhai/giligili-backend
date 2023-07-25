@@ -45,10 +45,10 @@ public class UserMomentsService {
         userMoments.setCreateTime(new Date());
         Long momentsId = userMomentsDao.addUserMoments(userMoments);
         //2.把用户动态添加到MQ
-        DefaultMQProducer producer = (DefaultMQProducer) applicationContext.getBean("momentsProducer");
+       /* DefaultMQProducer producer = (DefaultMQProducer) applicationContext.getBean("momentsProducer");
         byte[] bytes = JSONObject.toJSONString(userMoments).getBytes(StandardCharsets.UTF_8);
         Message msg = new Message(UserMomentConstant.TOPIC_MOMENTS,bytes);
-        RocketMQUtil.syncSendMsg(producer, msg);
+        RocketMQUtil.syncSendMsg(producer, msg);*/
     }
 
     /**

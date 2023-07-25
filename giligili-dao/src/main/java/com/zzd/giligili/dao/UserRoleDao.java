@@ -18,4 +18,10 @@ public interface UserRoleDao {
      * @return
      */
     List<UserRole> getUserRoleByUserid(Long userId);
+
+    /**
+     * 添加用户权限
+     * @param userRole
+     */
+    void addUserRole(UserRole userRole);
 }

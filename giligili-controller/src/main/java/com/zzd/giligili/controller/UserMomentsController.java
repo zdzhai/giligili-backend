@@ -3,6 +3,9 @@ package com.zzd.giligili.controller;
 import com.zzd.giligili.controller.support.UserSupport;
 import com.zzd.giligili.domain.JsonResponse;
 import com.zzd.giligili.domain.UserMoments;
+import com.zzd.giligili.domain.annotation.ApiLimitedRole;
+import com.zzd.giligili.domain.annotation.DataLimited;
+import com.zzd.giligili.domain.constant.AuthRoleConstant;
 import com.zzd.giligili.service.UserMomentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +33,8 @@ public class UserMomentsController {
      * @param userMoments
      * @return
      */
+    @ApiLimitedRole(limitedRoleCodeList = {AuthRoleConstant.ROLE_CODE_LV0})
+    @DataLimited
     @PostMapping("/user-moments")
     public JsonResponse<String> addUserMoments(@RequestBody UserMoments userMoments) throws Exception {
         Long userId = userSupport.getUserId();

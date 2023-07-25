@@ -1,10 +1,8 @@
 package com.zzd.giligili.service;
 
 import com.zzd.giligili.dao.UserAuthDao;
-import com.zzd.giligili.domain.auth.AuthRoleElementOperation;
-import com.zzd.giligili.domain.auth.AuthRoleMenu;
-import com.zzd.giligili.domain.auth.UserAuthorities;
-import com.zzd.giligili.domain.auth.UserRole;
+import com.zzd.giligili.domain.auth.*;
+import com.zzd.giligili.domain.constant.AuthRoleConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,5 +47,17 @@ public class UserAuthService {
         userAuthorities.setRoleElementOperationList(authRoleElementOperationList);
         userAuthorities.setRoleMenuList(authRoleMenuList);
         return userAuthorities;
+    }
+
+    /**
+     * 添加用户默认权限
+     * @param userId
+     */
+    public void addUserDefaultRole(Long userId) {
+        UserRole userRole = new UserRole();
+        AuthRole authRole = authRoleService.getAuthRoleByCode(AuthRoleConstant.ROLE_CODE_LV0);
+        userRole.setUserId(userId);
+        userRole.setRoleId(authRole.getId());
+        userRoleService.addUserRole(userRole);
     }
 }

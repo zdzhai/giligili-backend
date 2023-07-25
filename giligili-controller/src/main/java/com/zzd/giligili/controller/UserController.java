@@ -10,7 +10,9 @@ import com.zzd.giligili.service.utils.RSAUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author dongdong
@@ -119,6 +121,41 @@ public class UserController {
             result.setResList(checkedUserInfoList);
         }
         return new JsonResponse<>(result);
+    }
+
+    /**
+     * 获取双token
+     */
+    @PostMapping("/user-dts")
+    public JsonResponse<Map<String, Object>> loginForDts(@RequestBody User user) throws Exception {
+        Map<String, Object> map = userService.loginForDts(user);
+        return new JsonResponse<>(map);
+    }
+
+    /**
+     * 用户退出时删除refreshToken
+     * @param request
+     * @return
+     */
+    @DeleteMapping("/delete-refresh-token")
+    public JsonResponse<String> logout(HttpServletRequest request){
+        String refreshToken = request.getHeader("refreshToken");
+        Long userId = userSupport.getUserId();
+        userService.logout(userId, refreshToken);
+        return JsonResponse.success();
+    }
+
+    /**
+     * 刷新accessToken
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("access-token")
+    public JsonResponse<String> refreshAccessToken(HttpServletRequest request) throws Exception {
+        String refreshToken = request.getHeader("refreshToken");
+        String accessToken = userService.refreshAccessToken(refreshToken);
+        return new JsonResponse<>(accessToken);
     }
 
 }
