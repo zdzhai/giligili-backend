@@ -1,8 +1,10 @@
 package com.zzd.giligili.service.utils;
 
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 
 /**
  * MD5加密
@@ -33,5 +35,17 @@ public class MD5Util {
 		} else {
 			return content.getBytes();
 		}
+	}
+
+    public static String getFileMD5(MultipartFile file) throws IOException {
+		InputStream inputStream = file.getInputStream();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int readLength;
+		while ((readLength = inputStream.read(buffer)) > 0) {
+			baos.write(buffer, 0, readLength);
+		}
+		inputStream.close();
+		return DigestUtils.md5Hex(baos.toByteArray());
 	}
 }
