@@ -1,5 +1,6 @@
 package com.zzd;
 
+import com.zzd.giligili.service.webscocket.WebSocketService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -12,5 +13,6 @@ import org.springframework.context.ApplicationContext;
 public class GiligiliApp {
     public static void main(String[] args) {
         ApplicationContext applicationContext = SpringApplication.run(GiligiliApp.class, args);
+        WebSocketService.setApplicationContext(applicationContext);
     }
 }

@@ -33,7 +33,7 @@ public class UserInfoService  {
     }
 
     /**
-     * 页获取用户信息
+     * 分页获取用户信息
      * @param params
      * @return
      */
@@ -48,5 +48,9 @@ public class UserInfoService  {
             list = userInfoDao.pageListUserInfos(params);
         }
         return new PageResult<>(list, total);
+    }
+
+    public UserInfo getUserInfoById(Long userId){
+        return userInfoDao.getUserInfoById(userId);
     }
 }
