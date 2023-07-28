@@ -7,22 +7,22 @@
     <insert id="addVideo" parameterType="com.zzd.giligili.domain.Video"
                 useGeneratedKeys="true" keyProperty="id">
         insert into
-            t_file(
+            t_video(
                 id,
                 userId,
                 url,
-                thumgnail,
+                thumbnail,
                 title,
                 `type`,
-                duration
+                duration,
                 area,
                 description,
                 createTime
-            ) values (
-                #{{id},
+            )values(
+                #{id},
                 #{userId},
                 #{url},
-                #{thumgnail},
+                #{thumbnail},
                 #{title},
                 #{type},
                 #{duration},

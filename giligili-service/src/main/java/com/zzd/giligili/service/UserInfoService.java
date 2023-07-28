@@ -24,6 +24,30 @@ public class UserInfoService  {
     private UserInfoDao userInfoDao;
 
     /**
+     * 添加用户信息
+     * @param userInfo
+     */
+     public void addUserInfo(UserInfo userInfo) {
+         userInfoDao.addUserInfo(userInfo);
+    }
+
+    /**
+     * 通过id获取用户信息
+     * @param userId
+     * @return
+     */
+    public UserInfo getUserInfoById(Long userId){
+        return userInfoDao.getUserInfoById(userId);
+    }
+    /**
+     * 更新用户信息
+     * @param userInfo
+     */
+    Long updateUserInfo(UserInfo userInfo){
+        return userInfoDao.updateUserInfo(userInfo);
+    }
+
+    /**
      * 根据用户id集合获取用户信息
      * @param userIdSet
      * @return
@@ -50,7 +74,8 @@ public class UserInfoService  {
         return new PageResult<>(list, total);
     }
 
-    public UserInfo getUserInfoById(Long userId){
-        return userInfoDao.getUserInfoById(userId);
+    public List<UserInfo> listAll(){
+        return userInfoDao.listAll();
     }
+
 }

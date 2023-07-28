@@ -1,16 +1,25 @@
 package com.zzd.giligili.domain;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+
 import java.io.Serializable;
 import java.util.Date;
 
 /**
  * @TableName t_user_info
  */
+@Document(indexName = "user-infos")
 public class UserInfo implements Serializable {
+
+    @Id
     private Long id;
 
     private Long userId;
 
+    @Field(type = FieldType.Text)
     private String nick;
 
     private String avatar;
@@ -21,8 +30,10 @@ public class UserInfo implements Serializable {
 
     private String birth;
 
+    @Field(type = FieldType.Date)
     private Date createTime;
 
+    @Field(type = FieldType.Date)
     private Date updateTime;
 
     private boolean followed;

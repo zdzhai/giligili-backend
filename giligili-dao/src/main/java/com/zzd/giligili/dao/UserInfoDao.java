@@ -54,4 +54,10 @@ public interface UserInfoDao {
      * @return
      */
     List<UserInfo> pageListUserInfos(JSONObject params);
+
+    /**
+     * 获取所有用户信息
+     * @return
+     */
+    List<UserInfo> listAll();
 }

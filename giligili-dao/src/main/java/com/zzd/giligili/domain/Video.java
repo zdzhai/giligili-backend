@@ -14,6 +14,7 @@ public class Video {
     @Id
     private Long id;
 
+    @Field(type = FieldType.Long)
     private Long userId;//用户id
 
     private String url; //视频链接

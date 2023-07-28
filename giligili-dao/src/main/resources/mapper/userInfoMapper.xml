@@ -105,5 +105,11 @@
         order id desc
         limit #{start}, #{limit}
     </select>
+    <select id="listAll" resultType="com.zzd.giligili.domain.UserInfo">
+         select
+            *
+        from
+            t_user_info
+    </select>
 
 </mapper>

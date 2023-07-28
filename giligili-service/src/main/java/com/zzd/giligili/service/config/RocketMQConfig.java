@@ -7,6 +7,7 @@ import com.zzd.giligili.domain.UserMoments;
 import com.zzd.giligili.domain.constant.RedisConstant;
 import com.zzd.giligili.domain.constant.UserMomentConstant;
 import com.zzd.giligili.service.UserFollowingService;
+import com.zzd.giligili.service.webscocket.WebSocketService;
 import io.netty.util.internal.StringUtil;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
@@ -21,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +34,7 @@ import java.util.List;
 //@Configuration
 public class RocketMQConfig {
 
-    @Value("rocketmq.name.server.addr")
+    @Value("${rocketmq.name.server.addr}")
     public static String nameServerAddr;
 
     @Autowired
@@ -42,7 +44,7 @@ public class RocketMQConfig {
     private RedisTemplate<String, String> redisTemplate;
 
     /**
-     * 生产者
+     * 动态生产者
      * @return
      * @throws MQClientException
      */
@@ -55,6 +57,7 @@ public class RocketMQConfig {
     }
 
     /**
+     * 动态消费者
      * 采用推送模式的消费者及监听器
      * @return
      * @throws MQClientException
@@ -88,6 +91,59 @@ public class RocketMQConfig {
                     }
                     subscribedList.add(userMoments);
                     redisTemplate.opsForValue().set(key, JSONObject.toJSONString(subscribedList));
+                }
+                return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+            }
+        });
+        consumer.start();
+        return consumer;
+    }
+
+    /**
+     * 弹幕生产者
+     * @return
+     * @throws MQClientException
+     */
+    @Bean("danmusProducer")
+    public DefaultMQProducer danmusProducer() throws MQClientException {
+        DefaultMQProducer producer = new DefaultMQProducer(UserMomentConstant.GROUP_DANMUS);
+        producer.setNamesrvAddr(nameServerAddr);
+        producer.start();
+        return producer;
+    }
+
+    /**
+     * 弹幕消费者
+     * 采用推送模式的消费者及监听器
+     * @return
+     * @throws MQClientException
+     */
+    @Bean("danmusConsumer")
+    public DefaultMQPushConsumer danmusConsumer() throws MQClientException {
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(UserMomentConstant.GROUP_DANMUS);
+        consumer.setNamesrvAddr(nameServerAddr);
+        consumer.subscribe(UserMomentConstant.TOPIC_DANMUS,"*");
+        consumer.registerMessageListener(new MessageListenerConcurrently() {
+            @Override
+            public ConsumeConcurrentlyStatus consumeMessage(List<MessageExt> msgs, ConsumeConcurrentlyContext context) {
+                MessageExt msg = msgs.get(0);
+                if (msg == null) {
+                    return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
+                }
+                String bodyStr = new String(msg.getBody());
+                JSONObject jsonObject = JSONObject.parseObject(bodyStr);
+                //处理前端传递的参数
+                String sessionId = jsonObject.getString("sessionId");
+                //message是一个json(Danmu)，包含videoId和content
+                String message = jsonObject.getString("message");
+                //根据sessionId获取对应的WebSocketService
+                WebSocketService webSocketService = WebSocketService.WEBSOCKET_MAP.get(sessionId);
+                if (webSocketService.getSession().isOpen()) {
+                    try {
+                        webSocketService.sendMessage(message);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
             }

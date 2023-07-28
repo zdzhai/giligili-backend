@@ -43,6 +43,9 @@ public class VideoService {
         videoDao.addVideo(video);
         Long videoId = video.getId();
         List<VideoTag> videoTagList = video.getVideoTagList();
+        if (videoTagList == null) {
+            return;
+        }
         videoTagList.stream().forEach(item -> {
             item.setCreateTime(now);
             item.setVideoId(videoId);

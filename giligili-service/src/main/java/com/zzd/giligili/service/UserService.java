@@ -32,10 +32,15 @@ public class UserService {
     private UserDao userDao;
 
     @Resource
-    private UserInfoDao userInfoDao;
+    private UserInfoService userInfoService;
 
     @Autowired
     private UserAuthService userAuthService;
+
+    @Autowired
+    private ElasticSearchService elasticSearchService;
+
+
 
     @Transactional
     public void addUser(User user) {
@@ -72,7 +77,9 @@ public class UserService {
         userInfo.setBirth(UserConstant.DEFAULT_BIRTH);
         userInfo.setGender(UserConstant.GENDER_UNKNOW);
         userInfo.setCreateTime(now);
-        userInfoDao.addUserInfo(userInfo);
+        userInfoService.addUserInfo(userInfo);
+        //往es中添加用户信息数据
+        elasticSearchService.addUserInfo(userInfo);
         //添加默认权限角色
         userAuthService.addUserDefaultRole(user.getId());
 
@@ -121,7 +128,7 @@ public class UserService {
 
     public User getUserById(Long userId) {
         User user = userDao.getUserById(userId);
-        UserInfo userInfo = userInfoDao.getUserInfoById(userId);
+        UserInfo userInfo = userInfoService.getUserInfoById(userId);
         user.setUserInfo(userInfo);
         return user;
     }
@@ -133,7 +140,7 @@ public class UserService {
 
     public Long updateUserInfo(UserInfo userInfo) {
         userInfo.setUpdateTime(new Date());
-        return userInfoDao.updateUserInfo(userInfo);
+        return userInfoService.updateUserInfo(userInfo);
     }
 
     /**

@@ -1,6 +1,9 @@
 package com.zzd.giligili.controller;
 
+import com.zzd.giligili.domain.JsonResponse;
+import com.zzd.giligili.domain.Video;
 import com.zzd.giligili.service.DemoService;
+import com.zzd.giligili.service.ElasticSearchService;
 import com.zzd.giligili.service.FileService;
 import com.zzd.giligili.service.utils.FastDFSUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +28,9 @@ public class DemoController {
     private FastDFSUtil fastDFSUtil;
 
     @Autowired
+    private ElasticSearchService elasticSearchService;
+
+    @Autowired
     private FileService fileService;
 
     @GetMapping("/query")
@@ -35,5 +41,11 @@ public class DemoController {
     @GetMapping("/slices")
     public void slices(@RequestParam(value = "file") MultipartFile file) throws IOException {
         fastDFSUtil.convertFileToSlices(file);
+    }
+
+    @GetMapping("/es-videos")
+    public JsonResponse<Video> getEsVideo(@RequestParam String keyword) {
+        Video video = elasticSearchService.getVideo(keyword);
+        return new JsonResponse<>(video);
     }
 }

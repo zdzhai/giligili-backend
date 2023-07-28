@@ -2,6 +2,7 @@ package com.zzd.giligili.controller;
 
 import com.zzd.giligili.controller.support.UserSupport;
 import com.zzd.giligili.domain.*;
+import com.zzd.giligili.service.ElasticSearchService;
 import com.zzd.giligili.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,9 @@ public class VideoController {
     @Autowired
     private UserSupport userSupport;
 
+    @Autowired
+    private ElasticSearchService elasticSearchService;
+
     /**
      * 添加用户视频信息
      * @param video
@@ -33,6 +37,8 @@ public class VideoController {
         Long userId = userSupport.getUserId();
         video.setUserId(userId);
         videoService.addVideos(video);
+        //往es中添加视频数据
+        elasticSearchService.addVideo(video);
         return JsonResponse.success();
     }
 
@@ -191,5 +197,6 @@ public class VideoController {
         Map<String, Object> videoDetails = videoService.getVideoDetails(videoId);
         return new JsonResponse<>(videoDetails);
     }
+
 
 }

@@ -9,6 +9,7 @@ import io.netty.util.internal.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -16,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
+@EnableAsync
 public class DanmuService {
 
     private static final String DANMU_KEY = "dm-video-";
@@ -27,6 +29,11 @@ public class DanmuService {
     private RedisTemplate<String, String> redisTemplate;
 
     public void addDanmu(Danmu danmu){
+        danmuDao.addDanmu(danmu);
+    }
+
+    @Async
+    public void asyncAddDanmu(Danmu danmu){
         danmuDao.addDanmu(danmu);
     }
 
