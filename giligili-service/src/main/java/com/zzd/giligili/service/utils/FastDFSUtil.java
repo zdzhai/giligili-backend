@@ -3,6 +3,7 @@ package com.zzd.giligili.service.utils;
 import com.github.tobato.fastdfs.domain.fdfs.FileInfo;
 import com.github.tobato.fastdfs.domain.fdfs.MetaData;
 import com.github.tobato.fastdfs.domain.fdfs.StorePath;
+import com.github.tobato.fastdfs.domain.proto.storage.DownloadCallback;
 import com.github.tobato.fastdfs.service.AppendFileStorageClient;
 import com.github.tobato.fastdfs.service.FastFileStorageClient;
 import com.zzd.giligili.domain.constant.FileConstant;
@@ -236,5 +237,28 @@ public class FastDFSUtil {
         response.setContentLength((int) len);
         response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
         HttpUtil.get(url, headers, response);
+    }
+
+    /**
+     * 下载视频到本地
+     * @param url
+     * @param localPath
+     */
+    public void downloadFile(String url, String localPath) {
+        fastFileStorageClient.downloadFile(FileConstant.GROUP1, url, new DownloadCallback<String>() {
+            @Override
+            public String recv(InputStream ins) throws IOException {
+                File file = new File(localPath);
+                FileOutputStream outputStream = new FileOutputStream(file);
+                byte[] bytes = new byte[1024];
+                int len = 0;
+                while ((len = ins.read(bytes)) != -1) {
+                    outputStream.write(bytes, 0, len);
+                }
+                outputStream.close();
+                ins.close();
+                return "success";
+            }
+        });
     }
 }

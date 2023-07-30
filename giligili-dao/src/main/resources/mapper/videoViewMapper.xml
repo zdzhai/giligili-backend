@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zzd.giligili.dao.VideoViewDao">
+    <insert id="addVideoView" parameterType="com.zzd.giligili.domain.VideoView">
+        insert into
+            t_video_view(
+
+            ) values (
+
+            )
+    </insert>
+
+
+    <select id="getVideoView" parameterType="java.util.Map"
+            resultType="com.zzd.giligili.domain.VideoView">
+        select
+            *
+        from
+            t_video_view
+        where
+            videoId = #{videoId}
+            <if test="userId == null and clientId != null">
+                and clientId = #{clientId}
+            </if>
+            <if test="userId != null">
+                and userId = #{userId}
+            </if>
+            <if test="ip != null and ip != ''">
+                and ip = #{ip}
+            </if>
+            <if test="today != null and today != ''">
+                and DATE_FORMAT(createTime,'%Y-%m-%d') = #{today}
+            </if>
+    </select>
+    
+    <select id="getVideoViewCount" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select
+            count(1)
+        from
+            t_video_view
+        where
+            videoId = #{videoId}
+    </select>
+</mapper>

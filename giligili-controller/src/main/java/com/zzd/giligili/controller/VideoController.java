@@ -2,13 +2,16 @@ package com.zzd.giligili.controller;
 
 import com.zzd.giligili.controller.support.UserSupport;
 import com.zzd.giligili.domain.*;
+import com.zzd.giligili.domain.exception.ConditionException;
 import com.zzd.giligili.service.ElasticSearchService;
 import com.zzd.giligili.service.VideoService;
+import org.apache.mahout.cf.taste.common.TasteException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -196,6 +199,47 @@ public class VideoController {
     public JsonResponse<Map<String, Object>> getVideoDetails(@RequestParam Long videoId) {
         Map<String, Object> videoDetails = videoService.getVideoDetails(videoId);
         return new JsonResponse<>(videoDetails);
+    }
+
+    /**
+     * 区分游客和用户添加观看记录
+     * @param videoView
+     * @param request
+     * @return
+     */
+    @PostMapping("/video-view")
+    public JsonResponse<String> addVideoView(@RequestBody VideoView videoView,
+                                             HttpServletRequest request) {
+        Long userId;
+        try {
+            userId = userSupport.getUserId();
+            videoView.setUserId(userId);
+        } catch (Exception e ){ }
+        finally {
+            videoService.addVideoView(videoView, request);
+        }
+        return JsonResponse.success();
+    }
+
+    /**
+     * 根据视频id获取视频观看总量
+     * @param videoId
+     * @return
+     */
+    @GetMapping("/video-view-count")
+    public JsonResponse<Long> getVideoViewCount(Long videoId) {
+        if (videoId == null || videoId <= 0) {
+            throw new ConditionException("参数异常!");
+        }
+        Long count = videoService.getVideoViewCount(videoId);
+        return new JsonResponse<>(count);
+    }
+
+    @GetMapping("/video-recommend")
+    public JsonResponse<List<Video>> getVideoRecommend() throws TasteException {
+        Long userId = userSupport.getUserId();
+        List<Video> list = videoService.recommend(userId);
+        return new JsonResponse<>(list);
     }
 
 

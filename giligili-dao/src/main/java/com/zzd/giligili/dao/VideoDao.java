@@ -151,4 +151,10 @@ public interface VideoDao {
 
     Integer deleteVideoTags(@Param("tagIdList") List<Long> tagIdList,
                             @Param("videoId") Long videoId);
+
+    /**
+     * 获取用户的偏好视频
+     * @return
+     */
+    List<UserPreference> getAllUserPreference();
 }

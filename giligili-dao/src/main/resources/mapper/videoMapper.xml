@@ -369,6 +369,20 @@
         where
             tvt.videoId = #{videoId}
     </select>
+    <select id="getAllUserPreference" resultType="com.zzd.giligili.domain.UserPreference">
+        SELECT
+            userId,
+            videoId,
+            sum(CASE operationType
+            WHEN 0 THEN 6
+            WHEN 1 THEN 2
+            WHEN 2 then 2
+            ELSE 0 END) as `value`
+        FROM
+            t_video_operation
+        GROUP BY userId, videoId
+        ORDER BY userId, `value` DESC
+    </select>
 
     <delete id="deleteVideoTags">
         delete from

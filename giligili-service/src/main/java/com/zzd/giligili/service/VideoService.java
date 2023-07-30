@@ -4,6 +4,22 @@ import com.zzd.giligili.dao.VideoDao;
 import com.zzd.giligili.domain.*;
 import com.zzd.giligili.domain.exception.ConditionException;
 import com.zzd.giligili.service.utils.FastDFSUtil;
+import com.zzd.giligili.service.utils.IpUtil;
+import eu.bitwalker.useragentutils.UserAgent;
+import org.apache.mahout.cf.taste.common.TasteException;
+import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
+import org.apache.mahout.cf.taste.impl.model.GenericDataModel;
+import org.apache.mahout.cf.taste.impl.model.GenericPreference;
+import org.apache.mahout.cf.taste.impl.model.GenericUserPreferenceArray;
+import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
+import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
+import org.apache.mahout.cf.taste.impl.similarity.UncenteredCosineSimilarity;
+import org.apache.mahout.cf.taste.model.DataModel;
+import org.apache.mahout.cf.taste.model.PreferenceArray;
+import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
+import org.apache.mahout.cf.taste.recommender.RecommendedItem;
+import org.apache.mahout.cf.taste.recommender.Recommender;
+import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author dongdong
@@ -22,6 +40,9 @@ public class VideoService {
 
     @Resource
     private VideoDao videoDao;
+
+    @Autowired
+    private VideoViewService videoViewService;
 
     @Autowired
     private FastDFSUtil fastDFSUtil;
@@ -278,5 +299,91 @@ public class VideoService {
         result.put("video", video);
         result.put("userInfo", userInfo);
         return  result;
+    }
+
+    /**
+     * 区分游客和用户添加观看记录
+     * @param videoView
+     * @param request
+     */
+    public void addVideoView(VideoView videoView, HttpServletRequest request) {
+        //首先获取userId,videoId,clientId,IP
+        Long userId = videoView.getUserId();
+        Long videoId = videoView.getVideoId();
+        //生成clientId
+        String agent = request.getHeader("User-Agent");
+        UserAgent userAgent = UserAgent.parseUserAgentString(agent);
+        String clientId = String.valueOf(userAgent.getId());
+        String ip = IpUtil.getIP(request);
+        Map<String, Object> params = new HashMap<>();
+        if (userId != null) {
+            //用户模式
+            params.put("userId", userId);
+        } else {
+            //游客模式
+            params.put("clientId", clientId);
+            params.put("ip", ip);
+        }
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+        params.put("today", sdf.format(date));
+        params.put("videoId", videoId);
+        //添加观看记录 先查询（区分游客和用户）
+        VideoView dbVideoVIew = videoViewService.getVideoView(params);
+        if (dbVideoVIew == null) {
+            videoView.setIp(ip);
+            videoView.setClientId(clientId);
+            videoView.setCreateTime(date);
+            videoViewService.addVideoView(videoView);
+        }
+    }
+
+    /**
+     * 根据视频id获取视频观看总量
+     * @param videoId
+     * @return
+     */
+    public Long getVideoViewCount(Long videoId){
+        return videoViewService.getVideoViewCount(videoId);
+    }
+
+    /**
+     * 基于用户的协同推荐
+     * @param userId 用户id
+     */
+    public List<Video> recommend(Long userId) throws TasteException {
+        List<UserPreference> list = videoDao.getAllUserPreference();
+        //创建数据模型
+        DataModel dataModel = this.createDataModel(list);
+        //获取用户相似程度
+        UserSimilarity similarity = new UncenteredCosineSimilarity(dataModel);
+/*        System.out.println(similarity.userSimilarity(11, 12));
+        System.out.println(similarity.userSimilarity(11, 13));
+        System.out.println(similarity.userSimilarity(11, 14));*/
+        //获取用户邻居
+        UserNeighborhood userNeighborhood = new NearestNUserNeighborhood(2, similarity, dataModel);
+        long[] ar = userNeighborhood.getUserNeighborhood(userId);
+        //构建推荐器
+        Recommender recommender = new GenericUserBasedRecommender(dataModel, userNeighborhood, similarity);
+        //推荐视频
+        List<RecommendedItem> recommendedItems = recommender.recommend(userId, 5);
+        List<Long> itemIds = recommendedItems.stream().map(RecommendedItem::getItemID).collect(Collectors.toList());
+        return videoDao.batchGetVideosByIds(itemIds);
+    }
+
+    private DataModel createDataModel(List<UserPreference> userPreferenceList) {
+        FastByIDMap<PreferenceArray> fastByIdMap = new FastByIDMap<>();
+        Map<Long, List<UserPreference>> map = userPreferenceList.stream().collect(Collectors.groupingBy(UserPreference::getUserId));
+        Collection<List<UserPreference>> list = map.values();
+        for(List<UserPreference> userPreferences : list){
+            GenericPreference[] array = new GenericPreference[userPreferences.size()];
+            for(int i = 0; i < userPreferences.size(); i++){
+                UserPreference userPreference = userPreferences.get(i);
+                GenericPreference item = new GenericPreference(userPreference.getUserId(), userPreference.getVideoId(), userPreference.getValue());
+                array[i] = item;
+            }
+            fastByIdMap.put(array[0].getUserID(), new GenericUserPreferenceArray(Arrays.asList(array)));
+        }
+        return new GenericDataModel(fastByIdMap);
     }
 }
