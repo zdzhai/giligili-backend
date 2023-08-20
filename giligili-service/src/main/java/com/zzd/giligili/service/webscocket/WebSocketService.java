@@ -1,8 +1,10 @@
 package com.zzd.giligili.service.webscocket;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.zzd.giligili.domain.Danmu;
 import com.zzd.giligili.domain.constant.UserMomentConstant;
+import com.zzd.giligili.domain.vo.DanmuVO;
 import com.zzd.giligili.service.DanmuService;
 import com.zzd.giligili.service.utils.RocketMQUtil;
 import com.zzd.giligili.service.utils.TokenUtil;
@@ -11,6 +13,7 @@ import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.common.message.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -93,33 +96,41 @@ public class WebSocketService {
         try {
             this.sendMessage("0");
         } catch (Exception e) {
-        logger.error("连接异常!");
+            logger.error("连接异常!");
         }
     }
 
     @OnClose
     public void closeConnect() {
-        if (WEBSOCKET_MAP.contains(sessionId)) {
+        if (WEBSOCKET_MAP.containsKey(sessionId)) {
             WEBSOCKET_MAP.remove(sessionId);
             ONLINE_COUNT.getAndDecrement();
         }
-        logger.info("用户连接成功:" + sessionId + "," + "当前在线人数为" + ONLINE_COUNT.get());
+        logger.info("用户连接关闭:" + sessionId + "," + "当前在线人数为" + ONLINE_COUNT.get());
     }
 
+    /**
+     * 响应前端发送的消息
+     * @param message
+     */
     @OnMessage
     public void onMessage(String message)  {
         logger.info("用户信息:" + sessionId + "," + "报文" + message);
         if (!StringUtil.isNullOrEmpty(message)) {
+            Danmu danmu = JSONObject.parseObject(message, Danmu.class);
+            DanmuVO danmuVO = new DanmuVO();
+            BeanUtils.copyProperties(danmu, danmuVO);
+            message = JSON.toJSONString(danmuVO);
             try {
                 //群发消息
                 //批量处理，通过MQ进行并发分批发送
                 //todo 使用MQ进行削峰
                 for (Map.Entry<String, WebSocketService> entry : WEBSOCKET_MAP.entrySet()) {
                     WebSocketService webSocketService = entry.getValue();
-                    /*if (webSocketService.session.isOpen()) {
+                    if (webSocketService.session.isOpen()) {
                         webSocketService.sendMessage(message);
-                    }*/
-                    DefaultMQProducer danmusProducer = (DefaultMQProducer) APPLICATION_CONTEXT.getBean("danmusProducer");
+                    }
+                    /*DefaultMQProducer danmusProducer = (DefaultMQProducer) APPLICATION_CONTEXT.getBean("danmusProducer");
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("message", message);
                     jsonObject.put("sessionId", webSocketService.getSessionId());
@@ -127,19 +138,19 @@ public class WebSocketService {
                     msg.setTopic(UserMomentConstant.GROUP_DANMUS);
                     byte[] bytes = jsonObject.toJSONString().getBytes(StandardCharsets.UTF_8);
                     msg.setBody(bytes);
-                    RocketMQUtil.asyncSendMsg(danmusProducer, msg);
+                    RocketMQUtil.asyncSendMsg(danmusProducer, msg);*/
                 }
                 //数据持久化
                 //异步批量添加到mysql
                 if (this.userId != null) {
-                    Danmu danmu = JSONObject.parseObject(message, Danmu.class);
+                    //todo 数据库和redis的双写一致性 先更新数据库，再更新redis
                     danmu.setUserId(userId);
                     danmu.setCreateTime(new Date());
                     DanmuService danmuService = (DanmuService) APPLICATION_CONTEXT.getBean("danmuService");
                     danmuService.asyncAddDanmu(danmu);
                     //保存到redis
                     //todo 写入优化
-                    danmuService.addDanmusToRedis(danmu);
+                    danmuService.addDanmusToRedis(danmu.getVideoId(), danmuVO);
                 }
             } catch (Exception e) {
                 logger.error("弹幕接收异常");
@@ -160,7 +171,7 @@ public class WebSocketService {
             if (webSocketService.session.isOpen()) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("onlineCount", ONLINE_COUNT.get());
-                jsonObject.put("msg", "当前在线人数为" + ONLINE_COUNT.get());
+//                jsonObject.put("msg", "当前在线人数为" + ONLINE_COUNT.get());
                 webSocketService.sendMessage(jsonObject.toJSONString());
             }
         }
@@ -171,6 +182,11 @@ public class WebSocketService {
 
     }
 
+    /**
+     * 给客户端发送消息
+     * @param message
+     * @throws IOException
+     */
     public void sendMessage(String message) throws IOException {
         this.session.getBasicRemote().sendText(message);
     }

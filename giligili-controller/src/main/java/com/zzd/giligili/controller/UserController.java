@@ -2,11 +2,17 @@ package com.zzd.giligili.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zzd.giligili.controller.support.UserSupport;
-import com.zzd.giligili.domain.*;
+import com.zzd.giligili.domain.JsonResponse;
+import com.zzd.giligili.domain.PageResult;
+import com.zzd.giligili.domain.User;
+import com.zzd.giligili.domain.UserInfo;
+import com.zzd.giligili.domain.vo.UserInfoVO;
+import com.zzd.giligili.domain.vo.UserVO;
 import com.zzd.giligili.service.UserFollowingService;
 import com.zzd.giligili.service.UserInfoService;
 import com.zzd.giligili.service.UserService;
 import com.zzd.giligili.service.utils.RSAUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,9 +55,10 @@ public class UserController {
      * @return
      */
     @PostMapping("/users")
-    public JsonResponse<String> addUser(@RequestBody User user){
-        userService.addUser(user);
-        return JsonResponse.success();
+    public JsonResponse<Map<String, Object>> addUser(@RequestBody User user) throws Exception {
+        Map<String, Object> map = userService.addUser(user);
+
+        return new JsonResponse<>(map);
     }
 
     /**
@@ -64,14 +71,35 @@ public class UserController {
     }
 
     /**
-     * 根据用户id获取用户
+     * 根据用户id获取用户基本信息和详细信息
      * @return
      */
     @GetMapping("/users")
-    public JsonResponse<User> getUser(){
+    public JsonResponse<UserVO> getUser(){
         Long userId = userSupport.getUserId();
-        User user = userService.getUserById(userId);
-        return new JsonResponse<>(user);
+        UserVO userVO = userService.getUserById(userId);
+        return new JsonResponse<>(userVO);
+    }
+
+    /**
+     * 根据用户id获取用户详细信息
+     * @return
+     */
+    @GetMapping("/user-info")
+    public JsonResponse<UserInfoVO> getUserInfo(){
+        Long userId = userSupport.getUserId();
+        UserInfoVO userInfoVO = userInfoService.getUserInfoById(userId);
+        return new JsonResponse<>(userInfoVO);
+    }
+
+    /**
+     * 根据视频videoId获取用户详细信息
+     * @return
+     */
+    @GetMapping("/userinfo-videoId")
+    public JsonResponse<UserInfo> getUserInfoByVideoId(@RequestParam Long videoId){
+        UserInfo userInfo = userService.getUserInfoByVideoId(videoId);
+        return new JsonResponse<>(userInfo);
     }
 
     /**
@@ -151,7 +179,7 @@ public class UserController {
      * @return
      * @throws Exception
      */
-    @PostMapping("access-token")
+    @GetMapping("/access-token")
     public JsonResponse<String> refreshAccessToken(HttpServletRequest request) throws Exception {
         String refreshToken = request.getHeader("refreshToken");
         String accessToken = userService.refreshAccessToken(refreshToken);

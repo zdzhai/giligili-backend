@@ -240,6 +240,30 @@ public class FastDFSUtil {
     }
 
     /**
+     * 直接在线观看视频
+     * @param request
+     * @param response
+     * @param path
+     */
+    public void viewVideoOnline(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        String path) throws Exception {
+        FileInfo fileInfo = fastFileStorageClient.queryFileInfo(FileConstant.GROUP1, path);
+        long fileSize = fileInfo.getFileSize();
+        String url = httpFdfsStorageAddr + path;
+        Enumeration<String> headerNames = request.getHeaderNames();
+        Map<String, Object> headers = new HashMap<>();
+        while (headerNames.hasMoreElements()) {
+            String header = headerNames.nextElement();
+            headers.put(header, request.getHeader(header));
+        }
+        response.setHeader("Accept-Ranges", "bytes");
+        response.setHeader("Content-Type", "video/mp4");
+        response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+        HttpUtil.get(url, headers, response);
+    }
+
+    /**
      * 下载视频到本地
      * @param url
      * @param localPath

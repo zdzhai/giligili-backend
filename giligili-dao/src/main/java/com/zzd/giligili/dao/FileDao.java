@@ -22,4 +22,6 @@ public interface FileDao {
      * @return
      */
     File getFileByMD5(String md5);
+
+    void deleteFileByUrl(String url);
 }

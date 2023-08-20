@@ -11,12 +11,16 @@
                 videoId,
                 content,
                 danmuTime,
+                danmuType,
+                color,
                 createTime
             ) values (
                 #{userId},
                 #{videoId},
                 #{content},
                 #{danmuTime},
+                #{danmuType},
+                #{color},
                 #{createTime}
             )
     </insert>
@@ -33,6 +37,19 @@
             </if>
             <if test="endDate != null and endDate != ''">
                 and createTime <![CDATA[<=]]> #{endDate}
+        </if>
+    </select>
+    <select id="getDanmuVOs" resultType="com.zzd.giligili.domain.vo.DanmuVO">
+        select
+        userId, danmuTime, content
+        from t_danmu
+        where
+        videoId = #{videoId}
+        <if test="startDate != null and startDate != ''">
+            and createTime <![CDATA[>=]]> #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and createTime <![CDATA[<=]]> #{endDate}
         </if>
     </select>
 

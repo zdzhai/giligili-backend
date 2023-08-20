@@ -14,6 +14,26 @@ public class Danmu {
 
     private String danmuTime;
 
+    private Long danmuType;
+
+    private Long color;
+
+    public Long getDanmuType() {
+        return danmuType;
+    }
+
+    public void setDanmuType(Long danmuType) {
+        this.danmuType = danmuType;
+    }
+
+    public Long getColor() {
+        return color;
+    }
+
+    public void setColor(Long color) {
+        this.color = color;
+    }
+
     private Date createTime;
 
     public Long getId() {

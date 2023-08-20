@@ -3,6 +3,8 @@ package com.zzd.giligili.service;
 import com.zzd.giligili.dao.VideoDao;
 import com.zzd.giligili.domain.*;
 import com.zzd.giligili.domain.exception.ConditionException;
+import com.zzd.giligili.domain.vo.UserInfoVO;
+import com.zzd.giligili.domain.vo.UserVO;
 import com.zzd.giligili.service.utils.FastDFSUtil;
 import com.zzd.giligili.service.utils.IpUtil;
 import eu.bitwalker.useragentutils.UserAgent;
@@ -109,6 +111,7 @@ public class VideoService {
                                         HttpServletResponse response,
                                         String path) throws Exception {
         fastDFSUtil.viewVideoOnlineBySlices(request, response , path);
+//        fastDFSUtil.viewVideoOnline(request, response , path);
     }
 
     /**
@@ -293,11 +296,11 @@ public class VideoService {
             throw new ConditionException("非法视频!");
         }
         Long userId = video.getUserId();
-        User user = userService.getUserById(userId);
-        UserInfo userInfo = user.getUserInfo();
+        UserVO userVO = userService.getUserById(userId);
+        UserInfoVO userInfoVO = userVO.getUserInfo();
         HashMap<String, Object> result = new HashMap<>(2);
         result.put("video", video);
-        result.put("userInfo", userInfo);
+        result.put("userInfo", userInfoVO);
         return  result;
     }
 
@@ -366,9 +369,13 @@ public class VideoService {
         //构建推荐器
         Recommender recommender = new GenericUserBasedRecommender(dataModel, userNeighborhood, similarity);
         //推荐视频
-        List<RecommendedItem> recommendedItems = recommender.recommend(userId, 5);
+        List<RecommendedItem> recommendedItems = recommender.recommend(userId, 6);
         List<Long> itemIds = recommendedItems.stream().map(RecommendedItem::getItemID).collect(Collectors.toList());
-        return videoDao.batchGetVideosByIds(itemIds);
+        List<Video> videoList = videoDao.batchGetVideosByIds(itemIds);
+        if (videoList.size() > 6) {
+            videoList = videoList.subList(0, 6);
+        }
+        return videoList;
     }
 
     private DataModel createDataModel(List<UserPreference> userPreferenceList) {
@@ -385,5 +392,18 @@ public class VideoService {
             fastByIdMap.put(array[0].getUserID(), new GenericUserPreferenceArray(Arrays.asList(array)));
         }
         return new GenericDataModel(fastByIdMap);
+    }
+
+    /**
+     * 根据videoID获取视频详情
+     * @param videoId
+     * @return
+     */
+    public Video getVideo(Long videoId) {
+        return videoDao.getVideoById(videoId);
+    }
+
+    public List<Video> listAll() {
+            return videoDao.listAll();
     }
 }

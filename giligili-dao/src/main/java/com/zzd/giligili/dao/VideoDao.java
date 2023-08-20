@@ -157,4 +157,8 @@ public interface VideoDao {
      * @return
      */
     List<UserPreference> getAllUserPreference();
+
+    List<Video> listAll();
+
+    void deleteVideoByUrl(String url);
 }

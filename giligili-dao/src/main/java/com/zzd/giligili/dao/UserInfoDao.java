@@ -60,4 +60,11 @@ public interface UserInfoDao {
      * @return
      */
     List<UserInfo> listAll();
+
+    /**
+     * 根据视频videoId获取用户详细信息
+     * @param videoId
+     * @return
+     */
+    UserInfo getUserInfoByVideoId(Long videoId);
 }

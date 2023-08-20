@@ -8,9 +8,12 @@ import com.zzd.giligili.domain.User;
 import com.zzd.giligili.domain.UserInfo;
 import com.zzd.giligili.domain.constant.UserConstant;
 import com.zzd.giligili.domain.exception.ConditionException;
+import com.zzd.giligili.domain.vo.UserInfoVO;
+import com.zzd.giligili.domain.vo.UserVO;
 import com.zzd.giligili.service.utils.MD5Util;
 import com.zzd.giligili.service.utils.RSAUtil;
 import com.zzd.giligili.service.utils.TokenUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +46,7 @@ public class UserService {
 
 
     @Transactional
-    public void addUser(User user) {
+    public Map<String, Object> addUser(User user) throws Exception {
         //1.校验参数
         String phone = user.getPhone();
         if (StringUtils.isNullOrEmpty(phone)){
@@ -71,8 +74,9 @@ public class UserService {
         user.setCreateTime(now);
         userDao.addUser(user);
         //5.注册用户信息表
+        Long userId = user.getId();
         UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(user.getId());
+        userInfo.setUserId(userId);
         userInfo.setNick(UserConstant.DEFAULT_NICK_NAME);
         userInfo.setBirth(UserConstant.DEFAULT_BIRTH);
         userInfo.setGender(UserConstant.GENDER_UNKNOW);
@@ -82,7 +86,8 @@ public class UserService {
         elasticSearchService.addUserInfo(userInfo);
         //添加默认权限角色
         userAuthService.addUserDefaultRole(user.getId());
-
+        //生成双token
+        return generateDTS(userId);
     }
 
     private User getUserByPhone(String phone) {
@@ -126,11 +131,13 @@ public class UserService {
         return token;
     }
 
-    public User getUserById(Long userId) {
+    public UserVO getUserById(Long userId) {
         User user = userDao.getUserById(userId);
-        UserInfo userInfo = userInfoService.getUserInfoById(userId);
-        user.setUserInfo(userInfo);
-        return user;
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        UserInfoVO userInfoVO = userInfoService.getUserInfoById(userId);
+        userVO.setUserInfo(userInfoVO);
+        return userVO;
     }
 
     public Long updateUser(User user) {
@@ -144,7 +151,7 @@ public class UserService {
     }
 
     /**
-     * 获取双token
+     * 双token登录
      * @param user
      * @return
      */
@@ -174,18 +181,19 @@ public class UserService {
         if (!signPwd.equals(dbUser.getPassword())){
             throw new ConditionException("密码错误！");
         }
-        //3.生成用户登录token
         Long userId = dbUser.getId();
+        return generateDTS(userId);
+    }
+
+    public Map<String, Object> generateDTS(Long userId) throws Exception {
+        //3.生成用户登录token
         String token;
         try {
             token = TokenUtil.generateToken(userId);
         } catch (Exception e) {
             throw new ConditionException("获取token失败");
         }
-
         String refreshToken = TokenUtil.generateRefreshToken(userId);
-        userDao.deleteRefreshToken(userId, refreshToken);
-        userDao.addRefreshToken(userId, refreshToken, new Date());
         Map<String, Object> map = new HashMap<>();
         map.put("token", token);
         map.put("refreshToken", refreshToken);
@@ -202,12 +210,26 @@ public class UserService {
     }
 
     public String refreshAccessToken(String refreshToken) throws Exception {
-        RefreshTokenDetails refreshTokenDetails = userDao.getRefreshAccessToken(refreshToken);
+        /*RefreshTokenDetails refreshTokenDetails = userDao.getRefreshAccessToken(refreshToken);
         if (refreshTokenDetails == null) {
             throw new ConditionException("555", "token过期！");
+        }*/
+        Long userId = TokenUtil.verifyRefreshToken(refreshToken);
+        String token;
+        try {
+            token = TokenUtil.generateToken(userId);
+        } catch (Exception e) {
+            throw new ConditionException("获取token失败");
         }
-        TokenUtil.verifyToken(refreshToken);
-        Long userId = refreshTokenDetails.getUserId();
-       return TokenUtil.generateToken(userId);
+       return token;
+    }
+
+    /**
+     * 根据视频videoId获取用户详细信息
+     * @param videoId
+     * @return
+     */
+    public UserInfo getUserInfoByVideoId(Long videoId) {
+        return userInfoService.getUserInfoByVideoId(videoId);
     }
 }

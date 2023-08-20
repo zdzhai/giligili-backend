@@ -7,6 +7,7 @@ import com.zzd.giligili.domain.UserFollowing;
 import com.zzd.giligili.domain.UserInfo;
 import com.zzd.giligili.domain.constant.UserConstant;
 import com.zzd.giligili.domain.exception.ConditionException;
+import com.zzd.giligili.domain.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +61,7 @@ public class UserFollowingService {
         }
         //2.获取followingId用户看是否存在
         Long followingId = userFollowing.getFollowingId();
-        User followUser = userService.getUserById(followingId);
+        UserVO followUser = userService.getUserById(followingId);
         if (followUser == null) {
             throw new ConditionException("关注用户不存在！");
         }

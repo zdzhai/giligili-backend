@@ -5,6 +5,7 @@ import com.zzd.giligili.domain.*;
 import com.zzd.giligili.domain.exception.ConditionException;
 import com.zzd.giligili.service.ElasticSearchService;
 import com.zzd.giligili.service.VideoService;
+import org.apache.avro.data.Json;
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,17 @@ public class VideoController {
 
     @Autowired
     private ElasticSearchService elasticSearchService;
+
+    /**
+     * 获取用户视频信息
+     * @param videoId
+     * @return
+     */
+    @GetMapping("/video")
+    public JsonResponse<Video> getVideo(@RequestParam Long videoId) {
+        Video video = videoService.getVideo(videoId);
+        return new JsonResponse<>(video);
+    }
 
     /**
      * 添加用户视频信息
@@ -235,9 +247,17 @@ public class VideoController {
         return new JsonResponse<>(count);
     }
 
+    /**
+     * 获取首页视频推荐信息
+     * @return
+     * @throws TasteException
+     */
     @GetMapping("/video-recommend")
     public JsonResponse<List<Video>> getVideoRecommend() throws TasteException {
-        Long userId = userSupport.getUserId();
+        Long userId = 11L;
+        try {
+            userId = userSupport.getUserId();
+        } catch (Exception e) {}
         List<Video> list = videoService.recommend(userId);
         return new JsonResponse<>(list);
     }

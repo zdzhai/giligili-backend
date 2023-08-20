@@ -106,10 +106,20 @@
         limit #{start}, #{limit}
     </select>
     <select id="listAll" resultType="com.zzd.giligili.domain.UserInfo">
-         select
+        select
             *
         from
             t_user_info
+    </select>
+    <select id="getUserInfoByVideoId" parameterType="java.lang.Long"
+            resultType="com.zzd.giligili.domain.UserInfo">
+        SELECT
+            u.*
+        FROM
+            t_video v
+            left join t_user_info u
+            on v.userId = u.userId
+        where v.Id = #{videoId}
     </select>
 
 </mapper>

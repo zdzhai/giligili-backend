@@ -33,7 +33,9 @@ import java.util.Set;
 @Configuration
 public class CorsConfig implements Filter {
 
-    private final String[] allowedDomain = {"http://localhost:8080", "http://39.107.54.180"};
+    private final String[] allowedDomain = {"http://localhost:8080",
+            "http://39.107.54.180",
+            "http://localhost:5173"};
 
 
     @Override
@@ -50,10 +52,12 @@ public class CorsConfig implements Filter {
         if (allowedOrigins.contains(origin)){
             httpResponse.setHeader("Access-Control-Allow-Origin", origin);
             httpResponse.setContentType("application/json;charset=UTF-8");
-            httpResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
+            httpResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
             httpResponse.setHeader("Access-Control-Max-Age", "3600");
-            httpResponse.setHeader("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With, userId, token, ut");//表明服务器支持的所有头信息字段
-            httpResponse.setHeader("Access-Control-Allow-Credentials", "true"); //如果要把Cookie发到服务器，需要指定Access-Control-Allow-Credentials字段为true;
+            //表明服务器支持的所有头信息字段
+            httpResponse.setHeader("Access-Control-Allow-Headers", "refreshToken, Origin,token, X-Requested-With, Content-Type");
+            //如果要把Cookie发到服务器，需要指定Access-Control-Allow-Credentials字段为true;
+            httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
             httpResponse.setHeader("XDomainRequestAllowed","1");
         }
         chain.doFilter(request, response);

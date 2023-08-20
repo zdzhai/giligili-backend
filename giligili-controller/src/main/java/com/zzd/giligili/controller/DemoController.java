@@ -38,11 +38,6 @@ public class DemoController {
         return demoService.query(id);
     }
 
-    @GetMapping("/slices")
-    public void slices(@RequestParam(value = "file") MultipartFile file) throws IOException {
-        fastDFSUtil.convertFileToSlices(file);
-    }
-
     @GetMapping("/es-videos")
     public JsonResponse<Video> getEsVideo(@RequestParam String keyword) {
         Video video = elasticSearchService.getVideo(keyword);

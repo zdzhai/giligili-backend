@@ -329,11 +329,14 @@
         *
         from
         t_video
-        where
-        id in
-        <foreach collection="idList" item="id" open="(" close=")" separator=",">
-            #{id}
-        </foreach>
+        <if test="idList != null and idList.size > 0">
+            where
+            id in
+            <foreach collection="idList" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+
     </select>
 
     <insert id="batchAddVideoBinaryPictures" parameterType="java.util.List">
@@ -383,6 +386,12 @@
         GROUP BY userId, videoId
         ORDER BY userId, `value` DESC
     </select>
+    <select id="listAll" resultType="com.zzd.giligili.domain.Video">
+        select
+            *
+        from
+            t_video
+    </select>
 
     <delete id="deleteVideoTags">
         delete from
@@ -393,6 +402,13 @@
         <foreach collection="tagIdList" item="tagId" open="(" close=")" separator=",">
             #{tagId}
         </foreach>
+    </delete>
+
+    <delete id="deleteVideoByUrl">
+        delete from
+            t_video
+        where
+            url = #{url}
     </delete>
 
 </mapper>

@@ -1,16 +1,23 @@
 package com.zzd.giligili.service;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zzd.giligili.dao.UserInfoDao;
 import com.zzd.giligili.domain.PageResult;
 import com.zzd.giligili.domain.UserInfo;
+import com.zzd.giligili.domain.vo.DanmuVO;
+import com.zzd.giligili.domain.vo.UserInfoVO;
+import io.netty.util.internal.StringUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
 * @author dongdong
@@ -20,8 +27,13 @@ import java.util.Set;
 @Service
 public class UserInfoService  {
 
+    private static final String USERINFO_KEY = "gili:userinfo:";
+
     @Resource
     private UserInfoDao userInfoDao;
+
+    @Resource
+    private RedisTemplate<String, String> redisTemplate;
 
     /**
      * 添加用户信息
@@ -33,11 +45,25 @@ public class UserInfoService  {
 
     /**
      * 通过id获取用户信息
+     * 增加首次获取信息后缓存到redis
      * @param userId
      * @return
      */
-    public UserInfo getUserInfoById(Long userId){
-        return userInfoDao.getUserInfoById(userId);
+    public UserInfoVO getUserInfoById(Long userId){
+        //1.查redis
+        String key = USERINFO_KEY + userId;
+        String value = redisTemplate.opsForValue().get(key);
+        //2. 命中
+        if(!StringUtil.isNullOrEmpty(value)){
+            return JSONObject.parseObject(value, UserInfoVO.class);
+        } else {
+            //未命中
+            UserInfo dbUserInfo = userInfoDao.getUserInfoById(userId);
+            UserInfoVO userInfoVO = new UserInfoVO();
+            BeanUtils.copyProperties(dbUserInfo, userInfoVO);
+            redisTemplate.opsForValue().set(key, JSONObject.toJSONString(userInfoVO),10, TimeUnit.HOURS);
+            return userInfoVO;
+        }
     }
     /**
      * 更新用户信息
@@ -78,4 +104,7 @@ public class UserInfoService  {
         return userInfoDao.listAll();
     }
 
+    public UserInfo getUserInfoByVideoId(Long videoId) {
+        return userInfoDao.getUserInfoByVideoId(videoId);
+    }
 }

@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 @Component
 public class UserSupport {
 
-    public Long getUserId(){
+    public Long getUserId() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String token = request.getHeader("token");
         Long userId = TokenUtil.verifyToken(token);

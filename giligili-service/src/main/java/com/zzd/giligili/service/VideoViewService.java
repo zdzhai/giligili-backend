@@ -1,21 +1,11 @@
 package com.zzd.giligili.service;
 
-import com.zzd.giligili.dao.VideoDao;
 import com.zzd.giligili.dao.VideoViewDao;
-import com.zzd.giligili.domain.*;
-import com.zzd.giligili.domain.exception.ConditionException;
-import com.zzd.giligili.service.utils.FastDFSUtil;
-import com.zzd.giligili.service.utils.IpUtil;
-import eu.bitwalker.useragentutils.UserAgent;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.zzd.giligili.domain.VideoView;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Map;
 
 /**
  * @author dongdong

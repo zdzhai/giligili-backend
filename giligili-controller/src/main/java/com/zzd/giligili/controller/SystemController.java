@@ -23,10 +23,10 @@ public class SystemController {
 
 
     @GetMapping("/contents")
-    public JsonResponse<List<Map<String, Object>>> getContents(@RequestParam String keyword,
+    public JsonResponse<Map<String, Object>> getContents(@RequestParam("text") String text,
                                                                @RequestParam Integer pageNum,
                                                                @RequestParam Integer pageSize) throws IOException {
-        List<Map<String, Object>> contents = elasticSearchService.getContents(keyword, pageNum, pageSize);
+        Map<String, Object> contents = elasticSearchService.getContents(text, pageNum, pageSize);
         return new JsonResponse<>(contents);
     }
 }

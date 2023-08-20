@@ -18,6 +18,7 @@
                 #{createTime}
             )
     </insert>
+
     <select id="getFileByMD5" parameterType="java.lang.String" resultType="com.zzd.giligili.domain.File">
         select
             *
@@ -27,5 +28,11 @@
             md5 = #{md5}
     </select>
 
+    <delete id="deleteFileByUrl" parameterType="java.lang.String">
+        delete from
+            t_file
+        where
+            url = #{url}
+    </delete>
 
 </mapper>
