@@ -392,13 +392,36 @@
         from
             t_video
     </select>
+    <select id="getVideosByUserId" parameterType="java.lang.Long"  resultType="com.zzd.giligili.domain.Video">
+        select
+            *
+        from
+            t_video
+        where
+            userId = #{userId}
+    </select>
+    <select id="getStarVideosByUserId" parameterType="java.lang.Long"
+            resultType="com.zzd.giligili.domain.Video">
+        SELECT
+            v.*
+        FROM
+            t_video_collection vc
+            left join t_video v
+            on vc.videoId = v.id
+            where vc.userId = #{userId}
+    </select>
+    <select id="listVideoWithDelete" resultType="com.zzd.giligili.domain.Video">
+        select *
+        from t_video
+        where updateTime >= #{minUpdateTime}
+    </select>
 
     <delete id="deleteVideoTags">
         delete from
-        t_video_tag
+            t_video_tag
         where
-        videoId = #{videoId}
-        and tagId in
+            videoId = #{videoId}
+            and tagId in
         <foreach collection="tagIdList" item="tagId" open="(" close=")" separator=",">
             #{tagId}
         </foreach>

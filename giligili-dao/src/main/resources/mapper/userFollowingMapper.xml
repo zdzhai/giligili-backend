@@ -45,9 +45,19 @@
         select
             *
             from
+                t_user_following
+            where
+                followingId = #{followingId}
+    </select>
+    <select id="isFollowing" resultType="com.zzd.giligili.domain.UserFollowing">
+        select
+            *
+            from
             t_user_following
             where
-            followingId = #{userId}
+            followingId = #{videoUserId}
+            and
+            userId = #{userId}
     </select>
 
 </mapper>

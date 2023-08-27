@@ -42,7 +42,7 @@ public class UserFollowingService {
     /**
      * 添加用户关注信息
      */
-    @Transactional
+    @Transactional(rollbackFor = {ConditionException.class})
     public Long addUserFollowing(UserFollowing userFollowing){
         //1.先获取groupId
         Long groupId = userFollowing.getGroupId();
@@ -54,9 +54,11 @@ public class UserFollowingService {
             //todo 1.2如果不为空则先判断是不是 0/1/2
             //1.3不是的话根据groupId查询看分组是否存在
             //todo 如果是个人创建的分组 这里应该是根据groupId和userId一起查
-            FollowingGroup followingGroup = followingGroupService.getFollowingGroupByGroupId(groupId);
-            if (followingGroup == null) {
-                throw new ConditionException("用户分组不存在！");
+            if (!"3".equals(String.valueOf(groupId))) {
+                FollowingGroup followingGroup = followingGroupService.getFollowingGroupByGroupId(groupId);
+                if (followingGroup == null) {
+                    throw new ConditionException("用户分组不存在！");
+                }
             }
         }
         //2.获取followingId用户看是否存在
@@ -128,7 +130,7 @@ public class UserFollowingService {
         Set<Long> fansIdSet = fansList.stream().map(UserFollowing::getUserId).collect(Collectors.toSet());
         //2.根据ids查询粉丝信息
         if (fansIdSet.size() == 0){
-            throw new ConditionException("暂无粉丝！");
+            return fansList;
         }
         List<UserInfo> userInfoList = new ArrayList<>();
         userInfoList = userInfoService.getUserInfoByUserIds(fansIdSet);
@@ -162,6 +164,16 @@ public class UserFollowingService {
             }
         }
         return userInfoList;
+    }
+
+    /**
+     * 判断用户是否关注视频用户
+     * @param userId
+     * @param videoUserId
+     * @return
+     */
+    public UserFollowing isFollowing(Long userId, Long videoUserId) {
+        return userFollowingDao.isFollowing(userId, videoUserId);
     }
 }
 

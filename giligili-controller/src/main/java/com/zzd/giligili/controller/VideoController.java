@@ -32,18 +32,40 @@ public class VideoController {
     private ElasticSearchService elasticSearchService;
 
     /**
-     * 获取用户视频信息
+     * 获取视频信息
      * @param videoId
      * @return
      */
     @GetMapping("/video")
-    public JsonResponse<Video> getVideo(@RequestParam Long videoId) {
-        Video video = videoService.getVideo(videoId);
+    public JsonResponse<Video> getVideoById(@RequestParam Long videoId) {
+        Video video = videoService.getVideoById(videoId);
         return new JsonResponse<>(video);
     }
 
     /**
-     * 添加用户视频信息
+     * 根据userId获取用户所属视频信息
+     * @return
+     */
+    @GetMapping("/my-videos")
+    public JsonResponse<List<Video>> getVideosByUserId() {
+        Long userId = userSupport.getUserId();
+        List<Video> videoList = videoService.getVideosByUserId(userId);
+        return new JsonResponse<>(videoList);
+    }
+
+    /**
+     * 根据userId获取用户收藏视频信息
+     * @return
+     */
+    @GetMapping("/star-videos")
+    public JsonResponse<List<Video>> getStarVideosByUserId() {
+        Long userId = userSupport.getUserId();
+        List<Video> videoList = videoService.getStarVideosByUserId(userId);
+        return new JsonResponse<>(videoList);
+    }
+
+    /**
+     * 添加视频信息
      * @param video
      * @return
      */
@@ -137,6 +159,7 @@ public class VideoController {
             @RequestBody VideoCollection videoCollection) {
         Long userId = userSupport.getUserId();
         videoCollection.setUserId(userId);
+        videoCollection.setGroupId(0L);
         videoService.addVideoCollections(videoCollection);
         return JsonResponse.success();
     }

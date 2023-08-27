@@ -1,5 +1,6 @@
 package com.zzd.giligili.domain;
 
+import com.zzd.giligili.domain.vo.UserInfoVO;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -40,6 +41,16 @@ public class Video {
 
     @Field(type = FieldType.Date)
     private Date updateTime;
+
+    private UserInfoVO userInfoVO;
+
+    public UserInfoVO getUserInfo() {
+        return userInfoVO;
+    }
+
+    public void setUserInfo(UserInfoVO userInfoVO) {
+        this.userInfoVO = userInfoVO;
+    }
 
     public Long getId() {
         return id;

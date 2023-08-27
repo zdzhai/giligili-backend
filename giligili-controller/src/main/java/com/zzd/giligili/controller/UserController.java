@@ -2,10 +2,8 @@ package com.zzd.giligili.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zzd.giligili.controller.support.UserSupport;
-import com.zzd.giligili.domain.JsonResponse;
-import com.zzd.giligili.domain.PageResult;
-import com.zzd.giligili.domain.User;
-import com.zzd.giligili.domain.UserInfo;
+import com.zzd.giligili.domain.*;
+import com.zzd.giligili.domain.exception.ConditionException;
 import com.zzd.giligili.domain.vo.UserInfoVO;
 import com.zzd.giligili.domain.vo.UserVO;
 import com.zzd.giligili.service.UserFollowingService;
@@ -17,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,7 +56,6 @@ public class UserController {
     @PostMapping("/users")
     public JsonResponse<Map<String, Object>> addUser(@RequestBody User user) throws Exception {
         Map<String, Object> map = userService.addUser(user);
-
         return new JsonResponse<>(map);
     }
 
@@ -100,6 +98,20 @@ public class UserController {
     public JsonResponse<UserInfo> getUserInfoByVideoId(@RequestParam Long videoId){
         UserInfo userInfo = userService.getUserInfoByVideoId(videoId);
         return new JsonResponse<>(userInfo);
+    }
+
+    /**
+     * 根据用户id和视频id获取用户详细信息及三连信息
+     * @return
+     */
+    @GetMapping("/userinfo-san")
+    public JsonResponse<Map<String, Object>> getUserInfoAndSan(@RequestParam Long videoId){
+        Long userId = null;
+        try {
+             userId = userSupport.getUserId();
+        } catch (Exception e) { }
+        Map<String, Object> resMap = userInfoService.getUserInfoAndSan(userId, videoId);
+        return new JsonResponse<>(resMap);
     }
 
     /**

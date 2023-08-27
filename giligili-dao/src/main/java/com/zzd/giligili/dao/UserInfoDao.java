@@ -3,7 +3,9 @@ package com.zzd.giligili.dao;
 import com.alibaba.fastjson.JSONObject;
 import com.zzd.giligili.domain.UserInfo;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,7 +41,7 @@ public interface UserInfoDao {
      * @param userIdSet
      * @return
      */
-    List<UserInfo> getUserInfoByUserIds(Set<Long> userIdSet);
+    List<UserInfo> getUserInfoByUserIds(@Param("userIdSet") Set<Long> userIdSet);
 
     /**
      * 获取用户总数
@@ -67,4 +69,10 @@ public interface UserInfoDao {
      * @return
      */
     UserInfo getUserInfoByVideoId(Long videoId);
+
+    /**
+     * 查询用户信息列表（包括已被删除的数据）
+     * @param fiveMinutesAgoDate
+     */
+    List<UserInfo> listUserInfoWithDelete(Date fiveMinutesAgoDate);
 }

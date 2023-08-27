@@ -61,7 +61,8 @@
         userId = #{userId}
     </select>
 
-    <select id="getUserInfoByUserIds" resultType="com.zzd.giligili.domain.UserInfo">
+    <select id="getUserInfoByUserIds" parameterType="java.util.Set"
+            resultType="com.zzd.giligili.domain.UserInfo">
         select
             *
         from
@@ -72,10 +73,9 @@
                 and userId in
                 <foreach collection="userIdSet" item="userId" index="index" open="(" close=")"
                          separator=",">
-                    #(userId)
+                    #{userId}
                 </foreach>
             </if>
-        userId = #{userId}
     </select>
 
     <select id="pageCountUserInfos" parameterType="java.util.Map" resultType="java.lang.Long">
@@ -120,6 +120,11 @@
             left join t_user_info u
             on v.userId = u.userId
         where v.Id = #{videoId}
+    </select>
+    <select id="listUserInfoWithDelete" resultType="com.zzd.giligili.domain.UserInfo">
+        select *
+        from t_user_info
+        where updateTime >= #{minUpdateTime}
     </select>
 
 </mapper>

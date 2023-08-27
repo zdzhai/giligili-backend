@@ -13,7 +13,6 @@ import java.util.Date;
  */
 public class UserInfoVO implements Serializable {
 
-    @Id
     private Long id;
 
     private Long userId;
@@ -28,10 +27,29 @@ public class UserInfoVO implements Serializable {
 
     private String birth;
 
-    @Field(type = FieldType.Date)
     private Date createTime;
 
     private boolean followed;
+
+    private Long followingNum;
+
+    private Long fansNum;
+
+    public Long getFollowingNum() {
+        return followingNum;
+    }
+
+    public void setFollowingNum(Long followingNum) {
+        this.followingNum = followingNum;
+    }
+
+    public Long getFansNum() {
+        return fansNum;
+    }
+
+    public void setFansNum(Long fansNum) {
+        this.fansNum = fansNum;
+    }
 
     public boolean isFollowed() {
         return followed;

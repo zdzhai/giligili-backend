@@ -10,6 +10,7 @@ import com.zzd.giligili.domain.constant.UserConstant;
 import com.zzd.giligili.domain.exception.ConditionException;
 import com.zzd.giligili.domain.vo.UserInfoVO;
 import com.zzd.giligili.domain.vo.UserVO;
+import com.zzd.giligili.service.utils.HttpUtil;
 import com.zzd.giligili.service.utils.MD5Util;
 import com.zzd.giligili.service.utils.RSAUtil;
 import com.zzd.giligili.service.utils.TokenUtil;
@@ -80,6 +81,8 @@ public class UserService {
         userInfo.setNick(UserConstant.DEFAULT_NICK_NAME);
         userInfo.setBirth(UserConstant.DEFAULT_BIRTH);
         userInfo.setGender(UserConstant.GENDER_UNKNOW);
+        userInfo.setAvatar("https://xsgames.co/randomusers/avatar.php?g=pixel&key=1");
+        userInfo.setSign("唱，跳，rap,篮球，练习时长两年半的Java练习生！");
         userInfo.setCreateTime(now);
         userInfoService.addUserInfo(userInfo);
         //往es中添加用户信息数据

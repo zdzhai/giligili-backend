@@ -15,7 +15,7 @@ import java.util.List;
  * @author 62618
  * @description 针对表【t_user_following(用户关注表)】的数据库操作Mapper
  * @createDate 2023-07-19 20:38:21
- * @Entity generator.domain.TUserFollowing
+ * @Entity generator.domain.UserFollowing
  */
 @Mapper
 public interface UserFollowingDao {
@@ -45,5 +45,13 @@ public interface UserFollowingDao {
      * @param userId
      * @return
      */
-    List<UserFollowing> getUserFans(@Param("followingId")Long userId);
+    List<UserFollowing> getUserFans(@Param("followingId") Long userId);
+
+    /**
+     * 判断用户是否关注视频用户
+     * @param userId
+     * @param videoUserId
+     * @return
+     */
+    UserFollowing isFollowing(Long userId, Long videoUserId);
 }

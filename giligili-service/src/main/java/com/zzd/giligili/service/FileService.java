@@ -91,6 +91,7 @@ public class FileService {
         //保存视频信息到DB
         video.setCreateTime(now);
         video.setUrl(url);
+        video.setThumbnail("https://plus.unsplash.com/premium_photo-1673239605865-bfcab01dca06?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=MnwxfDB8MXxyYW5kb218MHx8fHx8fHx8MTY5MjUzODU5MQ&ixlib=rb-4.0.3&q=80&w=400");
         videoDao.addVideo(video);
         //往es中添加视频数据
         elasticSearchService.addVideo(video);

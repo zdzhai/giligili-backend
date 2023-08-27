@@ -55,6 +55,12 @@ public class VideoService {
     @Autowired
     private UserService userService;
 
+    @Resource
+    private UserInfoService userInfoService;
+
+    @Resource
+    private VideoOperationService videoOperationService;
+
     /**
      * 添加用户视频信息
      * @param video
@@ -119,20 +125,24 @@ public class VideoService {
      * @param userId
      * @param videoId
      */
+    @Transactional(rollbackFor = {ConditionException.class})
     public void addVideoLikes(Long userId, Long videoId) {
         Video video = videoDao.getVideoById(videoId);
         if (video == null) {
             throw new ConditionException("非法视频!");
         }
-        VideoLike videoLike = videoDao.getVideoLikeByVideoIdAndUserId(videoId, userId);
-        if (videoLike != null) {
-            throw new ConditionException("已点赞!");
-        }
-        videoLike = new VideoLike();
+        VideoLike videoLike = new VideoLike();
         videoLike.setUserId(userId);
         videoLike.setVideoId(videoId);
         videoLike.setCreateTime(new Date());
         videoDao.addVideoLike(videoLike);
+        //添加点赞操作
+        VideoOperation videoOperation = new VideoOperation();
+        videoOperation.setUserId(userId);
+        videoOperation.setVideoId(videoId);
+        videoOperation.setOperationType("0");
+        videoOperation.setCreateTime(new Date());
+        videoOperationService.addLikeOperation(videoOperation);
     }
 
     /**
@@ -140,20 +150,23 @@ public class VideoService {
      * @param userId
      * @param videoId
      */
+    @Transactional(rollbackFor = {ConditionException.class})
     public void deleteVideoLikes(Long userId, Long videoId) {
         Video video = videoDao.getVideoById(videoId);
         if (video == null) {
             throw new ConditionException("非法视频!");
         }
-        VideoLike videoLike = videoDao.getVideoLikeByVideoIdAndUserId(videoId, userId);
-        if (videoLike == null) {
-            throw new ConditionException("未点赞!");
-        }
         videoDao.deleteVideoLike(videoId, userId);
+        //删除点赞操作
+        VideoOperation videoOperation = new VideoOperation();
+        videoOperation.setUserId(userId);
+        videoOperation.setVideoId(videoId);
+        videoOperation.setOperationType("0");
+        videoOperationService.deleteLikeOperation(videoOperation);
     }
 
     /**
-     * 查询视频的总点赞数
+     * 查询视频的总点赞数以及当前用户是否点赞
      * @param userId
      * @param videoId
      * @return
@@ -163,7 +176,7 @@ public class VideoService {
         VideoLike videoLike = videoDao.getVideoLikeByVideoIdAndUserId(videoId, userId);
         boolean like = videoLike != null;
         HashMap<String, Object> result = new HashMap<>(2);
-        result.put("count", countLikes);
+        result.put("countLikes", countLikes);
         result.put("like", like);
         return  result;
     }
@@ -172,7 +185,7 @@ public class VideoService {
      * 收藏
      * @param videoCollection
      */
-    @Transactional
+    @Transactional(rollbackFor = {ConditionException.class})
     public void addVideoCollections(VideoCollection videoCollection) {
         //参数校验
         Long videoId = videoCollection.getVideoId();
@@ -191,6 +204,13 @@ public class VideoService {
         //添加新收藏记录
         videoCollection.setCreateTime(new Date());
         videoDao.addVideoCollection(videoCollection);
+        //添加收藏操作
+        VideoOperation videoOperation = new VideoOperation();
+        videoOperation.setUserId(userId);
+        videoOperation.setVideoId(videoId);
+        videoOperation.setOperationType("1");
+        videoOperation.setCreateTime(new Date());
+        videoOperationService.addStarOperation(videoOperation);
     }
 
     /**
@@ -198,16 +218,23 @@ public class VideoService {
      * @param videoId
      * @param userId
      */
+    @Transactional(rollbackFor = {ConditionException.class})
     public void deleteVideoCollections(Long videoId, Long userId) {
         //参数校验
         if (videoId == null) {
             throw new ConditionException("参数异常!");
         }
         videoDao.deleteVideoCollection(videoId, userId);
+        //删除收藏操作
+        VideoOperation videoOperation = new VideoOperation();
+        videoOperation.setUserId(userId);
+        videoOperation.setVideoId(videoId);
+        videoOperation.setOperationType("1");
+        videoOperationService.deleteStarOperation(videoOperation);
     }
 
     /**
-     *
+     * 查询视频的总收藏数以及当前用户是否收藏
      * @param userId
      * @param videoId
      * @return
@@ -215,10 +242,10 @@ public class VideoService {
     public Map<String, Object> getVideoCollections(Long userId, Long videoId) {
         Long countCollections = videoDao.getVideoCollections(videoId);
         VideoCollection videoCollection = videoDao.getVideoCollectionByVideoIdAndUserId(videoId, userId);
-        boolean like = videoCollection != null;
+        boolean star = videoCollection != null;
         HashMap<String, Object> result = new HashMap<>(2);
-        result.put("count", countCollections);
-        result.put("like", like);
+        result.put("countCollections", countCollections);
+        result.put("star", star);
         return  result;
     }
 
@@ -271,10 +298,10 @@ public class VideoService {
         Long countCoins = videoDao.getVideoCoinsAmount(videoId);
         //查看当前用户是否已投币
         VideoCoin videoCoin = videoDao.getVideoCoinByVideoIdAndUserId(videoId, userId);
-        boolean like = videoCoin != null;
+        boolean coin = videoCoin != null;
         HashMap<String, Object> result = new HashMap<>(2);
-        result.put("count", countCoins);
-        result.put("like", like);
+        result.put("countCoins", countCoins);
+        result.put("coin", coin);
         return  result;
     }
 
@@ -375,6 +402,11 @@ public class VideoService {
         if (videoList.size() > 6) {
             videoList = videoList.subList(0, 6);
         }
+        for (Video video : videoList) {
+            Long videoUserId = video.getUserId();
+            UserInfoVO userInfoById = userInfoService.getUserInfoById(videoUserId);
+            video.setUserInfo(userInfoById);
+        }
         return videoList;
     }
 
@@ -399,11 +431,47 @@ public class VideoService {
      * @param videoId
      * @return
      */
-    public Video getVideo(Long videoId) {
+    public Video getVideoById(Long videoId) {
         return videoDao.getVideoById(videoId);
     }
 
     public List<Video> listAll() {
             return videoDao.listAll();
+    }
+
+    /**
+     * 根据userId获取用户所属视频信息
+     * @param userId
+     * @return
+     */
+    public List<Video> getVideosByUserId(Long userId) {
+        List<Video> videoList = videoDao.getVideosByUserId(userId);
+        for (Video video : videoList) {
+            Long videoUserId = video.getUserId();
+            UserInfoVO userInfoById = userInfoService.getUserInfoById(videoUserId);
+            video.setUserInfo(userInfoById);
+        }
+        return videoList;
+    }
+
+    /**
+     * 根据userId获取用户收藏视频信息
+     * @param userId
+     * @return
+     */
+    public List<Video> getStarVideosByUserId(Long userId) {
+        List<Video> starVideoList = videoDao.getStarVideosByUserId(userId);
+        for (Video video : starVideoList) {
+            Long videoUserId = video.getUserId();
+            UserInfoVO userInfoById = userInfoService.getUserInfoById(videoUserId);
+            video.setUserInfo(userInfoById);
+        }
+        return starVideoList;
+    }
+    /**
+     * 查询视频列表（包括已被删除的数据）
+     */
+    public List<Video> listVideoWithDelete(Date fiveMinutesAgoDate) {
+        return videoDao.listVideoWithDelete(fiveMinutesAgoDate);
     }
 }

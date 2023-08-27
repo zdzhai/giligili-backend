@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
+ * @author dongdong
  * @TableName t_user_following
  */
 public class UserFollowing implements Serializable {

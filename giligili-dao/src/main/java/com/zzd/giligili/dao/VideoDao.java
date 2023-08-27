@@ -4,6 +4,7 @@ import com.zzd.giligili.domain.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -161,4 +162,24 @@ public interface VideoDao {
     List<Video> listAll();
 
     void deleteVideoByUrl(String url);
+
+    /**
+     * 根据userId获取用户所属视频信息
+     * @param userId
+     * @return
+     */
+    List<Video> getVideosByUserId(Long userId);
+
+    /**
+     * 根据userId获取用户收藏视频信息
+     * @param userId
+     * @return
+     */
+    List<Video> getStarVideosByUserId(Long userId);
+
+    /**
+     * 查询视频列表（包括已被删除的数据）
+     */
+    List<Video> listVideoWithDelete(Date fiveMinutesAgoDate);
+
 }
