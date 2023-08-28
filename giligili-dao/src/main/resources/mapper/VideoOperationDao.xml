@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zzd.giligili.dao.VideoOperationDao">
+
+    <resultMap id="BaseResultMap" type="com.zzd.giligili.domain.VideoOperation">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="userId" column="userId" jdbcType="BIGINT"/>
+            <result property="videoId" column="videoId" jdbcType="BIGINT"/>
+            <result property="operationType" column="operationType" jdbcType="VARCHAR"/>
+            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,userId,videoId,
+        operationType,createTime
+    </sql>
+    <insert id="addLikeOperation" parameterType="com.zzd.giligili.domain.VideoOperation">
+        insert into
+            t_video_operation(
+                userId,
+                videoId,
+                operationType,
+                createTime
+            ) values(
+                #{userId},
+                #{videoId},
+                #{operationType},
+                #{createTime}
+            )
+    </insert>
+    <insert id="addStarOperation">
+        insert into
+            t_video_operation(
+                userId,
+                videoId,
+                operationType,
+                createTime
+            ) values(
+                #{userId},
+                #{videoId},
+                #{operationType},
+                #{createTime}
+            )
+    </insert>
+    <delete id="deleteLikeOperation" parameterType="com.zzd.giligili.domain.VideoOperation">
+        delete from
+            t_video_operation
+        where
+            userId = #{userId}
+            and videoId = #{videoId}
+            and operationType = #{operationType}
+    </delete>
+    <delete id="deleteStarOperation" parameterType="com.zzd.giligili.domain.VideoOperation">
+        delete from
+            t_video_operation
+        where
+            userId = #{userId}
+            and videoId = #{videoId}
+            and operationType = #{operationType}
+    </delete>
+</mapper>
